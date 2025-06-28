@@ -4,13 +4,16 @@ Vaani-Nyay is an AI-powered, voice-friendly legal aid and case tracking system d
 
 Features
 
-- Voice-based interaction support (planned)
+- Voice-to-text legal form filling using  ASR
+- Real-time text translation using  NMT
+- Text-to-speech for guidance using  TTS
 - User registration and login
-- Case filing and tracking
-- View detailed case progress
-- Clean, mobile-friendly UI
-- MongoDB backend
-- Fully scalable for hackathons and real deployment
+- Case filing with voice and text input
+- Track case status and progress
+- View detailed case timelines, remarks, and documents
+- Accessible, clean, mobile-friendly user interface
+- MongoDB backend with Express.js
+
 
 Tech Stack
 

@@ -291,7 +291,7 @@ export default function Home() {
                   <i className="fas fa-envelope mr-2"></i> help@vaani-nyay.in
                 </li>
                 <li className="text-gray-400">
-                  <i className="fas fa-map-marker-alt mr-2"></i>Indore, India
+                  <i className="fas fa-map-marker-alt mr-2"></i>Indoree, India
                 </li>
               </ul>
             </div>

@@ -227,7 +227,7 @@ const Register = () => {
                 </div>
               </div>
               <div className="space-y-2">
-                <label htmlFor="email" className="block text-sm font-medium text-gray-300">State</label>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-300">Statee</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
                     <FaEnvelope className="w-4 h-4" />

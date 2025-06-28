@@ -1,17 +1,28 @@
-
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 interface LanguageContextType {
   selectedLanguage: string;
   setSelectedLanguage: (language: string) => void;
   translate: (key: string) => string;
+  speechLang: string;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
+// Language to speech recognition language mapping
+const speechLanguages: Record<string, string> = {
+  en: 'en-US',
+  hi: 'hi-IN',
+  bn: 'bn-IN',
+  // Add more languages as needed
+};
+
+
+
 // Translation dictionaries
 const translations: Record<string, Record<string, string>> = {
   en: {
+
     'forms.title': 'Government Forms',
     'forms.subtitle': 'Digital form filling made easy',
     'forms.bankAccount': 'Bank Account Opening Form',
@@ -44,7 +55,7 @@ const translations: Record<string, Record<string, string>> = {
     'language.select': 'Select Language',
     'language.hindi': 'हिन्दी',
     'language.bengali': 'বাংলা',
-    'language.tamil': 'தমিழ்',
+    'language.tamil': 'தமிழ்',
     'language.telugu': 'తెలుగు',
     'language.marathi': 'मराठी',
     'language.gujarati': 'ગુજરાતી',
@@ -52,6 +63,7 @@ const translations: Record<string, Record<string, string>> = {
     'button.back': 'Back to Forms',
     'button.previous': 'Previous',
     'button.next': 'Next',
+    'button.stop': 'Stop',
     'button.submit': 'Submit Form',
     'button.download': 'Download PDF',
     'button.preview': 'Preview Form',
@@ -66,7 +78,17 @@ const translations: Record<string, Record<string, string>> = {
     'of.label': 'of',
     'enter.label': 'Enter',
     'confirm.saveChanges': 'Save changes and return to preview?',
-    
+
+    'button.listenAgain': 'Listen Again',
+    'button.startListening': 'Start Listening',
+    'status.listening': 'Listening...',
+    'status.processing': 'Processing...',
+    'status.speakNow': 'Speak now...',
+    'status.voiceNotSupported': 'Voice input not supported in your browser',
+    'status.noMicrophone': 'Microphone access not granted',
+    'status.voiceTimeout': 'Listening timed out',
+    'status.voiceError': 'Voice input error',
+    'language.audio': 'Audio Language',
     // Questions
     'question.assemblyConstituencyNo': 'What is your Assembly Constituency Number?',
     'question.assemblyConstituencyName': 'What is the name of your Assembly Constituency?',
@@ -92,7 +114,7 @@ const translations: Record<string, Record<string, string>> = {
     'question.applicationType': 'Please select your application type',
     'question.documentsAvailable': 'Please select the documents you have available',
     'question.uploadDocument': 'Upload supporting documents',
-    
+
     // Examples
     'example.assemblyConstituencyNo': 'e.g., 123',
     'example.assemblyConstituencyName': 'e.g., Gandhi Nagar',
@@ -115,13 +137,13 @@ const translations: Record<string, Record<string, string>> = {
     'example.district': 'e.g., New Delhi',
     'example.stateUt': 'e.g., Delhi, Maharashtra',
     'example.otherDocument': 'e.g., Birth Certificate, Passport',
-    
+
     // Application types
     'appType.shifting': 'Shifting of Residence',
     'appType.correction': 'Correction of Entries in Existing Electoral Roll',
     'appType.replacement': 'Issue of Replacement EPIC without correction',
     'appType.disability': 'Request for marking as Person with Disability',
-    
+
     // Document types
     'doc.utility': 'Water/Electricity/Gas connection Bill for that address (atleast 1 year)',
     'doc.passbook': 'Current passbook of Nationalised/Scheduled Bank/Post Office',
@@ -130,7 +152,7 @@ const translations: Record<string, Record<string, string>> = {
     'doc.aadhaar': 'Aadhaar Card',
     'doc.passport': 'Indian Passport',
     'doc.sale': 'Registered Sale Deed (In case of own house)',
-    
+
     // Preview form labels
     'preview.to': 'To,',
     'preview.electoralOfficer': 'The Electoral Registration Officer,',
@@ -168,6 +190,7 @@ const translations: Record<string, Record<string, string>> = {
     'language.select': 'भाषा चुनें',
     'search.placeholder': 'फॉर्म खोजें...',
     'button.back': 'फॉर्म पर वापस जाएं',
+    'button.stop': 'रोकें',
     'button.previous': 'पिछला',
     'button.next': 'अगला',
     'button.submit': 'फॉर्म जमा करें',
@@ -184,7 +207,7 @@ const translations: Record<string, Record<string, string>> = {
     'of.label': 'का',
     'enter.label': 'दर्ज करें',
     'confirm.saveChanges': 'परिवर्तन सहेजें और पूर्वावलोकन पर वापस जाएं?',
-    
+
     // Questions in Hindi
     'question.assemblyConstituencyNo': 'आपका विधानसभा निर्वाचन क्षेत्र संख्या क्या है?',
     'question.assemblyConstituencyName': 'आपके विधानसभा निर्वाचन क्षेत्र का नाम क्या है?',
@@ -210,7 +233,7 @@ const translations: Record<string, Record<string, string>> = {
     'question.applicationType': 'कृपया अपना आवेदन प्रकार चुनें',
     'question.documentsAvailable': 'कृपया उपलब्ध दस्तावेज़ चुनें',
     'question.uploadDocument': 'सहायक दस्तावेज़ अपलोड करें',
-    
+
     // Examples in Hindi
     'example.assemblyConstituencyNo': 'उदा., 123',
     'example.assemblyConstituencyName': 'उदा., गांधी नगर',
@@ -233,13 +256,13 @@ const translations: Record<string, Record<string, string>> = {
     'example.district': 'उदा., नई दिल्ली',
     'example.stateUt': 'उदा., दिल्ली, महाराष्ट्र',
     'example.otherDocument': 'उदा., जन्म प्रमाण पत्र, पासपोर्ट',
-    
+
     // Application types in Hindi
     'appType.shifting': 'निवास स्थान परिवर्तन',
     'appType.correction': 'मौजूदा मतदाता सूची में सुधार',
     'appType.replacement': 'बिना सुधार के प्रतिस्थापन EPIC जारी करना',
     'appType.disability': 'विकलांग व्यक्ति के रूप में चिह्नित करने का अनुरोध',
-    
+
     // Document types in Hindi
     'doc.utility': 'उस पते के लिए पानी/बिजली/गैस कनेक्शन बिल (कम से कम 1 साल)',
     'doc.passbook': 'राष्ट्रीयकृत/अनुसूचित बैंक/पोस्ट ऑफिस की वर्तमान पासबुक',
@@ -247,7 +270,18 @@ const translations: Record<string, Record<string, string>> = {
     'doc.rent': 'पंजीकृत किराया पट्टा विलेख (किरायेदार के मामले में)',
     'doc.aadhaar': 'आधार कार्ड',
     'doc.passport': 'भारतीय पासपोर्ट',
-    'doc.sale': 'पंजीकृत बिक्री विलेख (अपने घर के मामले में)'
+    'doc.sale': 'पंजीकृत बिक्री विलेख (अपने घर के मामले में)',
+
+    'button.listenAgain': 'फिर से सुनें',
+    'button.startListening': 'सुनना शुरू करें',
+    'status.listening': 'सुन रहा हूँ...',
+    'status.processing': 'प्रसंस्करण...',
+    'status.speakNow': 'अब बोलें...',
+    'status.voiceNotSupported': 'आपके ब्राउज़र में वॉइस इनपुट समर्थित नहीं है',
+    'status.noMicrophone': 'माइक्रोफोन एक्सेस अनुमति नहीं मिली',
+    'status.voiceTimeout': 'सुनने का समय समाप्त',
+    'status.voiceError': 'आवाज इनपुट त्रुटि',
+    'language.audio': 'ऑडियो भाषा'
   },
   bn: {
     'forms.title': 'সরকারি ফর্ম',
@@ -273,7 +307,7 @@ const translations: Record<string, Record<string, string>> = {
     'of.label': 'এর',
     'enter.label': 'প্রবেশ করুন',
     'confirm.saveChanges': 'পরিবর্তন সংরক্ষণ করুন এবং প্রিভিউতে ফিরে যান?',
-    
+
     // Questions in Bengali  
     'question.assemblyConstituencyNo': 'আপনার বিধানসভা নির্বাচনী এলাকার নম্বর কী?',
     'question.assemblyConstituencyName': 'আপনার বিধানসভা নির্বাচনী এলাকার নাম কী?',
@@ -298,19 +332,43 @@ const translations: Record<string, Record<string, string>> = {
     'question.otherDocument': 'আপনি যে অন্য কোনো নথি সংযুক্ত করতে চান তা উল্লেখ করুন',
     'question.applicationType': 'আপনার আবেদনের ধরন নির্বাচন করুন',
     'question.documentsAvailable': 'আপনার কাছে উপলব্ধ নথিগুলি নির্বাচন করুন',
-    'question.uploadDocument': 'সহায়ক নথি আপলোড করুন'
+    'question.uploadDocument': 'সহায়ক নথি আপলোড করুন',
+
+    'button.listenAgain': 'আবার শুনুন',
+    'button.startListening': 'শোনা শুরু করুন',
+    'button.stop': 'বন্ধ করুন',
+    'status.listening': 'শুনছি...',
+    'status.processing': 'প্রক্রিয়াকরণ...',
+    'status.speakNow': 'এখন কথা বলুন...',
+    'status.voiceNotSupported': 'আপনার ব্রাউজারে ভয়েস ইনপুট সমর্থিত নয়',
+    'status.noMicrophone': 'মাইক্রোফোন অ্যাক্সেস দেওয়া হয়নি',
+    'status.voiceTimeout': 'শোনার সময় শেষ',
+    'status.voiceError': 'ভয়েস ইনপুট ত্রুটি',
+    'language.audio': 'অডিও ভাষা'
   }
 };
-
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   const [selectedLanguage, setSelectedLanguage] = useState('en');
 
   const translate = (key: string): string => {
+    // Don't translate if the key doesn't start with a letter (avoids translating form IDs etc.)
+    if (!/^[a-z]/.test(key)) {
+      return key;
+    }
+
+    // Try selected language first, then fallback to English
     return translations[selectedLanguage]?.[key] || translations.en[key] || key;
   };
 
+  const speechLang = speechLanguages[selectedLanguage] || 'en-US';
+
   return (
-    <LanguageContext.Provider value={{ selectedLanguage, setSelectedLanguage, translate }}>
+    <LanguageContext.Provider value={{
+      selectedLanguage,
+      setSelectedLanguage,
+      translate,
+      speechLang
+    }}>
       {children}
     </LanguageContext.Provider>
   );

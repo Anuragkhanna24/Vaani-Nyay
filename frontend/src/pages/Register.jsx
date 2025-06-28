@@ -7,9 +7,11 @@ const Register = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    state:'',
     phone: '',
     password: '',
     confirmPassword: ''
+    
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -204,7 +206,8 @@ const Register = () => {
                 </div>
               </div>
               
-              <div className="space-y-2">
+              
+               <div className="space-y-2">
                 <label htmlFor="email" className="block text-sm font-medium text-gray-300">Email</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
@@ -223,7 +226,25 @@ const Register = () => {
                   />
                 </div>
               </div>
-              
+              <div className="space-y-2">
+                <label htmlFor="email" className="block text-sm font-medium text-gray-300">State</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                    <FaEnvelope className="w-4 h-4" />
+                  </div>
+                  <input
+                    type="state"
+                    id="state"
+                    name="state"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                    placeholder="Enter your state"
+                    className="w-full pl-10 pr-4 py-3 rounded-lg bg-[#1E293B] text-white placeholder-gray-400 border border-[#334155] focus:outline-none focus:ring-2 focus:ring-[#33FEBF] transition-colors"
+                    disabled={loading}
+                  />
+                </div>
+              </div>
               <div className="space-y-2">
                 <label htmlFor="phone" className="block text-sm font-medium text-gray-300">Phone Number</label>
                 <div className="relative">

@@ -258,6 +258,9 @@ const translations: Record<string, Record<string, string>> = {
     'question.presentAddress.tehsilTaluka': 'आपकी तहसील/तालुका/मंडल का नाम क्या है?',
     'question.presentAddress.district': 'आपके जिले का नाम क्या है?',
     'question.presentAddress.stateUt': 'आपके राज्य/केंद्र शासित प्रदेश का नाम क्या है?',
+    'question.declarationDate': 'घोषणा की तिथि दर्ज करें',
+'question.declarationPlace': 'घोषणा का स्थान दर्ज करें',
+
     // Examples in Hindi
     'example.assemblyConstituencyNo': 'उदा., 123',
     'example.assemblyConstituencyName': 'उदा., गांधी नगर',
@@ -372,6 +375,9 @@ const translations: Record<string, Record<string, string>> = {
     'question.presentAddress.tehsilTaluka': 'আপনার তহসিল/তালুকা/মন্ডলের নাম কী?',
     'question.presentAddress.district': 'আপনার জেলার নাম কী?',
     'question.presentAddress.stateUt': 'আপনার রাজ্য/কেন্দ্রশাসিত অঞ্চলের নাম কী?',
+    'question.declarationDate': 'ঘোষণার তারিখ লিখুন',
+'question.declarationPlace': 'ঘোষণার স্থান লিখুন',
+
 
     'button.listenAgain': 'আবার শুনুন',
     'button.startListening': 'শোনা শুরু করুন',

@@ -1,35 +1,31 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useLocation } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useLanguage } from "../contexts/LanguageContext";
-import React, { useRef } from "react";
 import Header from "@/components/Header";
 
 export default function Home() {
   const location = useLocation();
-
-  useEffect(() => {
-    if (location.state?.scrollToContact) {
-      const contactSection = document.getElementById("contact");
-      if (contactSection) {
-        setTimeout(() => {
-          contactSection.scrollIntoView({ behavior: "smooth" });
-        }, 100); // slight delay to wait for DOM rendering
-      }
-    }
-  }, [location]);
-
   const navigate = useNavigate();
   const { translate } = useLanguage();
+
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState([]);
   const [chatInput, setChatInput] = useState("");
 
+  const contactRef = useRef(null);
+
+  useEffect(() => {
+    if (location.state?.scrollToContact && contactRef.current) {
+      setTimeout(() => {
+        contactRef.current.scrollIntoView({ behavior: "smooth" });
+      }, 100); // delay to ensure the DOM is rendered
+    }
+  }, [location]);
+
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
-  const contactRef = useRef(null);
 
   const toggleChatbot = () => {
     setIsChatbotOpen(!isChatbotOpen);
@@ -46,7 +42,6 @@ export default function Home() {
     setChatMessages([...chatMessages, newMessage]);
     setChatInput("");
 
-    // Simulate bot response
     setTimeout(() => {
       const botResponse = {
         text: "Thank you for your question. Our legal assistant will respond shortly.",
@@ -241,6 +236,7 @@ export default function Home() {
       </section>
 
       {/* Footer */}
+     {/* Footer with Contact Section */}
       <footer ref={contactRef} className="bg-[#141E28] text-white pt-11 pb-7">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -330,110 +326,12 @@ export default function Home() {
           </div>
 
           <div className="border-t border-[#1e2a38] mt-8 pt-6 text-center text-gray-400">
-            <p>&copy; 2023 Vaani-Nyay. All rights reserved.</p>
+            <p>&copy; 2025 Vaani-Nyay. All rights reserved.</p>
           </div>
         </div>
       </footer>
-
-      {/* Chatbot Button
-      <div className="fixed bottom-6 left-6 z-50">
-        <button 
-          onClick={toggleChatbot}
-          className="bg-[#33FEBF] text-[#141E28] p-4 rounded-full shadow-lg hover:bg-[#2ae8af] transition duration-300"
-        >
-          <i className="fas fa-comment-dots text-xl"></i>
-        </button>
-      </div> */}
-
-      {/* Chatbot Modal */}
-      {isChatbotOpen && (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div
-              className="fixed inset-0 transition-opacity"
-              aria-hidden="true"
-            >
-              <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
-            </div>
-
-            <span
-              className="hidden sm:inline-block sm:align-middle sm:h-screen"
-              aria-hidden="true"
-            >
-              &#8203;
-            </span>
-
-            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                <div className="sm:flex sm:items-start">
-                  <div className="w-full">
-                    <div className="flex justify-between items-center mb-4">
-                      <h3 className="text-lg leading-6 font-medium text-[#141E28]">
-                        Legal Assistance Chat
-                      </h3>
-                      <button
-                        onClick={toggleChatbot}
-                        className="text-gray-400 hover:text-gray-500"
-                      >
-                        <i className="fas fa-times"></i>
-                      </button>
-                    </div>
-
-                    <div className="h-64 overflow-y-auto mb-4 border rounded-lg p-4 bg-gray-50">
-                      {chatMessages.length === 0 ? (
-                        <div className="text-center text-gray-500 mt-16">
-                          <p>
-                            Ask me anything about legal procedures or your
-                            application
-                          </p>
-                        </div>
-                      ) : (
-                        chatMessages.map((message, index) => (
-                          <div
-                            key={index}
-                            className={`mb-3 ${
-                              message.sender === "user"
-                                ? "text-right"
-                                : "text-left"
-                            }`}
-                          >
-                            <div
-                              className={`inline-block p-2 rounded-lg ${
-                                message.sender === "user"
-                                  ? "bg-[#33FEBF] text-[#141E28]"
-                                  : "bg-gray-200 text-gray-800"
-                              }`}
-                            >
-                              {message.text}
-                            </div>
-                          </div>
-                        ))
-                      )}
-                    </div>
-
-                    <div className="flex">
-                      <input
-                        type="text"
-                        value={chatInput}
-                        onChange={(e) => setChatInput(e.target.value)}
-                        onKeyPress={handleKeyPress}
-                        placeholder="Type your legal question..."
-                        className="flex-grow p-2 border rounded-l-lg focus:outline-none focus:ring-1 focus:ring-[#33FEBF]"
-                      />
-                      <button
-                        onClick={sendMessage}
-                        className="bg-[#33FEBF] text-[#141E28] p-2 rounded-r-lg hover:bg-[#2ae8af]"
-                      >
-                        <i className="fas fa-paper-plane"></i>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
+
+

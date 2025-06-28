@@ -29,7 +29,7 @@ function Footer(){
               <ul className="space-y-2">
                 <li className="text-gray-400"><i className="fas fa-phone-alt mr-2"></i> +91 1800 123 4567</li>
                 <li className="text-gray-400"><i className="fas fa-envelope mr-2"></i> help@vaani-nyay.in</li>
-                <li className="text-gray-400"><i className="fas fa-map-marker-alt mr-2"></i> New Delhi, India</li>
+                <li className="text-gray-400"><i className="fas fa-map-marker-alt mr-2"></i> Indore, India</li>
               </ul>
             </div>
             
@@ -45,7 +45,7 @@ function Footer(){
           </div>
           
           <div className="border-t border-[#1e2a38] mt-8 pt-6 text-center text-gray-400">
-            <p>&copy; 2023 Vaani-Nyay. All rights reserved.</p>
+            <p>&copy; 2025 Vaani-Nyay. All rights reserved.</p>
           </div>
         </div>
       </footer>

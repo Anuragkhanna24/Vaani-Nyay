@@ -1,82 +1,50 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const cors = require('cors');
-const rateLimit = require('express-rate-limit');
-require('dotenv').config();
+const express = require("express");
+const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const cors = require("cors");
+require("dotenv").config();
 
 const app = express();
 
-// MongoDB URI (move this before connecting!)
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/vaani-nyay';
+// MongoDB URI
+const MONGODB_URI =
+  process.env.MONGODB_URI || "mongodb://localhost:27017/vaani-nyay";
 
 // Middleware
-app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    credentials: true,
+  })
+);
 app.use(express.json());
 
-// Rate limiting
-
 // MongoDB Connection
-mongoose.connect(MONGODB_URI)
-  .then(() => console.log('Connected to MongoDB'))
-  .catch((err) => console.error('MongoDB connection error:', err));
+mongoose
+  .connect(MONGODB_URI)
+  .then(() => console.log("Connected to MongoDB"))
+  .catch((err) => console.error("MongoDB connection error:", err));
 
-// User Schema
-const userSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: [true, 'Name is required'],
-    trim: true,
-    minlength: [2, 'Name must be at least 2 characters long'],
-    maxlength: [50, 'Name cannot exceed 50 characters']
+/* ----------------------------- User Schema ----------------------------- */
+const userSchema = new mongoose.Schema(
+  {
+    name: String,
+    email: String,
+    phone: String,
+    password: String,
+    role: { type: String, enum: ["user", "admin"], default: "user" },
+    isActive: { type: Boolean, default: true },
+    lastLogin: Date,
   },
-  email: {
-    type: String,
-    required: [true, 'Email is required'],
-    unique: true,
-    lowercase: true,
-    trim: true,
-    match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please enter a valid email']
-  },
-  phone: {
-    type: String,
-    required: [true, 'Phone number is required'],
-    trim: true,
-    match: [/^[6-9]\d{9}$/, 'Please enter a valid Indian phone number']
-  },
-  password: {
-    type: String,
-    required: [true, 'Password is required'],
-    minlength: [8, 'Password must be at least 8 characters long']
-  },
-  role: {
-    type: String,
-    enum: ['user', 'admin'],
-    default: 'user'
-  },
-  isActive: {
-    type: Boolean,
-    default: true
-  },
-  lastLogin: {
-    type: Date
-  }
-}, { timestamps: true });
+  { timestamps: true }
+);
 
-// Password hashing
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
-  try {
-    const salt = await bcrypt.genSalt(12);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
-  } catch (error) {
-    next(error);
-  }
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
+  const salt = await bcrypt.genSalt(12);
+  this.password = await bcrypt.hash(this.password, salt);
+  next();
 });
 
 userSchema.methods.comparePassword = function (candidatePassword) {
@@ -84,212 +52,257 @@ userSchema.methods.comparePassword = function (candidatePassword) {
 };
 
 userSchema.methods.generateAuthToken = function () {
-  return jwt.sign({
-    userId: this._id,
-    email: this.email,
-    name: this.name,
-    role: this.role
-  }, process.env.JWT_SECRET || 'your_jwt_secret_key_here', {
-    expiresIn: process.env.JWT_EXPIRES_IN || '7d'
-  });
+  return jwt.sign(
+    {
+      userId: this._id,
+      email: this.email,
+      name: this.name,
+      role: this.role,
+    },
+    process.env.JWT_SECRET || "secret",
+    { expiresIn: "7d" }
+  );
 };
 
-const User = mongoose.model('User', userSchema);
+const User = mongoose.model("User", userSchema);
 
-// Auth middleware
-const authenticateToken = async (req, res, next) => {
-  try {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
+/* ----------------------------- Case Schema ----------------------------- */
+const caseSchema = new mongoose.Schema(
+  {
+    title: { type: String, required: true },
+    caseId: { type: String, required: true, unique: true },
+    status: {
+      type: String,
+      enum: [
+        "Pending",
+        "Under Review",
+        "Documentation Required",
+        "Approved",
+        "Closed",
+        "Rejected",
+      ],
+      default: "Pending",
+    },
+    progress: { type: Number, default: 0 },
+    nextHearingDate: Date,
+    createdAt: { type: Date, default: Date.now },
+    applicationType: { type: String, default: "General" },
+  },
+  { timestamps: true }
+);
 
-    if (!token) return res.status(401).json({ error: 'Access token required' });
+const Case = mongoose.model("Case", caseSchema);
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret_key_here');
-    const user = await User.findById(decoded.userId).select('-password');
-
-    if (!user || !user.isActive) {
-      return res.status(401).json({ error: 'Invalid token or user not found' });
-    }
-
-    req.user = user;
-    next();
-  } catch (error) {
-    return res.status(403).json({ error: 'Invalid or expired token' });
-  }
-};
-
-// Routes
+/* ----------------------------- Routes ----------------------------- */
 
 // Health Check
-app.get('/api/health', (req, res) => {
+app.get("/api/health", (req, res) => {
   res.json({
-    status: 'OK',
-    message: 'Vaani-Nyay Backend is running',
-    timestamp: new Date().toISOString()
+    status: "OK",
+    message: "Vaani-Nyay Backend is running",
+    timestamp: new Date().toISOString(),
   });
 });
 
 // Register
-app.post('/api/auth/register', async (req, res) => {
+app.post("/api/auth/register", async (req, res) => {
   try {
-    const { name, email, phone, password } = req.body;
+    const { name, email, phone, password, confirmPassword } = req.body;
 
-    if (!name || !email || !phone || !password) {
-      return res.status(400).json({ error: 'All fields are required' });
+    if (!name || !email || !phone || !password || !confirmPassword) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+
+    if (password !== confirmPassword) {
+      return res.status(400).json({ error: "Passwords do not match" });
     }
 
     if (password.length < 8) {
-      return res.status(400).json({ error: 'Password must be at least 8 characters long' });
+      return res
+        .status(400)
+        .json({ error: "Password must be at least 8 characters long" });
     }
 
     const existingUser = await User.findOne({ $or: [{ email }, { phone }] });
     if (existingUser) {
-      return res.status(409).json({
-        error: existingUser.email === email
-          ? 'User with this email already exists'
-          : 'User with this phone number already exists'
-      });
+      return res
+        .status(409)
+        .json({ error: "User with this email or phone already exists" });
     }
 
-    const user = new User({
-      name: name.trim(),
-      email: email.toLowerCase().trim(),
-      phone: phone.trim(),
-      password
-    });
-
+    const user = new User({ name, email, phone, password });
     await user.save();
 
     // JWT expires in 2 hours
     const token = jwt.sign(
       { id: user._id },
-      process.env.JWT_SECRET || 'your_jwt_secret_key_here',
-      { expiresIn: '2h' }
+      process.env.JWT_SECRET || "your_jwt_secret_key_here",
+      { expiresIn: "2h" }
     );
 
     res.status(201).json({
+      message: "User registered successfully",
       token,
       user: {
         name: user.name,
         email: user.email,
-        phone: user.phone
-      }
+        phone: user.phone,
+      },
     });
-
   } catch (error) {
-    console.error('Registration error:', error);
-    if (error.name === 'ValidationError') {
-      const validationErrors = Object.values(error.errors).map(err => err.message);
-      return res.status(400).json({ error: validationErrors[0] || 'Validation failed' });
+    console.error("Registration error:", error);
+    if (error.name === "ValidationError") {
+      const validationErrors = Object.values(error.errors).map(
+        (err) => err.message
+      );
+      return res
+        .status(400)
+        .json({ error: validationErrors[0] || "Validation failed" });
     }
-    res.status(500).json({ error: 'Internal server error. Please try again later.' });
+    res
+      .status(500)
+      .json({ error: "Internal server error. Please try again later." });
   }
 });
 
 // Login
-app.post('/api/auth/login', async (req, res) => {
+app.post("/api/auth/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password are required' });
+      return res.status(400).json({ error: "Email and password are required" });
     }
 
-    const user = await User.findOne({ email: email.toLowerCase().trim(), isActive: true });
+    const user = await User.findOne({ email });
     if (!user || !(await user.comparePassword(password))) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      return res.status(401).json({ error: "Invalid credentials" });
     }
+
+    user.lastLogin = new Date();
+    await user.save();
 
     // JWT expires in 2 hours
     const token = jwt.sign(
       { id: user._id },
-      process.env.JWT_SECRET || 'your_jwt_secret_key_here',
-      { expiresIn: '2h' }
+      process.env.JWT_SECRET || "your_jwt_secret_key_here",
+      { expiresIn: "2h" }
     );
 
     res.json({
+      message: "Login successful",
       token,
       user: {
         name: user.name,
         email: user.email,
-        phone: user.phone
-      }
-    });
-
-  } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({ error: 'Internal server error. Please try again later.' });
-  }
-});
-
-// Profile
-app.get('/api/auth/profile', authenticateToken, async (req, res) => {
-  try {
-    res.json({
-      user: {
-        id: req.user._id,
-        name: req.user.name,
-        email: req.user.email,
-        phone: req.user.phone,
-        role: req.user.role,
-        createdAt: req.user.createdAt,
-        lastLogin: req.user.lastLogin
-      }
+        phone: user.phone,
+      },
     });
   } catch (error) {
-    console.error('Profile fetch error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Login error:", error);
+    res
+      .status(500)
+      .json({ error: "Internal server error. Please try again later." });
   }
 });
 
-// Get all users (admin only)
-app.get('/api/users', authenticateToken, async (req, res) => {
+/* ---------------------- TRACK CASE API ENDPOINTS ---------------------- */
+
+// Create a new case
+app.post("/api/cases", async (req, res) => {
   try {
-    if (req.user.role !== 'admin') return res.status(403).json({ error: 'Access denied' });
+    const { title, applicationType } = req.body;
 
-    const users = await User.find().select('-password');
-    res.json({ users });
-  } catch (error) {
-    console.error('Get users error:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-// Get user by ID
-app.get('/api/users/:id', authenticateToken, async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    if (req.user.role !== 'admin' && req.user._id.toString() !== id) {
-      return res.status(403).json({ error: 'Access denied' });
+    if (!title) {
+      return res.status(400).json({ error: "Title is required" });
     }
 
-    const user = await User.findById(id).select('-password');
-    if (!user) return res.status(404).json({ error: 'User not found' });
+    // Generate unique caseId
+    const caseId = Math.random().toString(36).substr(2, 9).toUpperCase();
 
-    res.json({ user });
+    const newCase = new Case({
+      title,
+      caseId,
+      applicationType: applicationType || "General",
+    });
+
+    await newCase.save();
+
+    res.status(201).json({
+      message: "Case created successfully",
+      case: newCase,
+    });
   } catch (error) {
-    console.error('Get user by ID error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Create case error:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
-// Logout (no token invalidation)
-app.post('/api/auth/logout', authenticateToken, (req, res) => {
-  res.json({ message: 'Logged out successfully' });
+// Get all cases with optional search
+app.get("/api/cases", async (req, res) => {
+  try {
+    const { search } = req.query;
+    let query = {};
+    if (search) {
+      query = {
+        $or: [
+          { title: { $regex: search, $options: "i" } },
+          { caseId: { $regex: search, $options: "i" } },
+        ],
+      };
+    }
+    const cases = await Case.find(query).sort({ createdAt: -1 });
+    res.json({ cases });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
 });
 
-// Fallback error handlers
-app.use((error, req, res, next) => {
-  console.error('Unhandled error:', error);
-  res.status(500).json({ error: 'Something went wrong!' });
+// Get a single case by ID
+app.get("/api/cases/:id", async (req, res) => {
+  try {
+    const caseItem = await Case.findById(req.params.id);
+    if (!caseItem) return res.status(404).json({ error: "Case not found" });
+    res.json({ case: caseItem });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
 });
 
+// Update a case by ID
+app.put("/api/cases/:id", async (req, res) => {
+  try {
+    const updatedCase = await Case.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
+    if (!updatedCase) return res.status(404).json({ error: "Case not found" });
+    res.json({ message: "Case updated successfully", case: updatedCase });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// Delete a case by ID
+app.delete("/api/cases/:id", async (req, res) => {
+  try {
+    const deletedCase = await Case.findByIdAndDelete(req.params.id);
+    if (!deletedCase) return res.status(404).json({ error: "Case not found" });
+    res.json({ message: "Case deleted successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+/* ----------------------------- Fallbacks ----------------------------- */
 app.use((req, res) => {
-  res.status(404).json({ error: 'Route not found' });
+  res.status(404).json({ error: "Route not found" });
 });
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`Vaani-Nyay Backend Server running on port ${PORT}`);
+  console.log("Vaani-Nyay Backend Server running on port ${PORT}");
 });

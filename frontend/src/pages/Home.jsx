@@ -67,7 +67,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 py-24 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center">
             <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-6">
-              Making Legal Aid Simple and Accessible
+              Making Legal Aid Simple And Accessible
             </h1>
             <p className="max-w-2xl mx-auto text-xl md:text-2xl mb-8">
               Voice-powered legal aid for every Indian citizen. File your legal
@@ -80,7 +80,10 @@ export default function Home() {
               >
                 Start Your Legal Application
               </button>
-              <button onClick={() => navigate('/ask-vaani-nyay')} className="bg-transparent hover:bg-white hover:bg-opacity-10 font-bold py-3 px-8 border-2 border-white rounded-lg transition duration-300 transform hover:scale-105">
+              <button
+                onClick={() => navigate("/ask-vaani-nyay")}
+                className="bg-transparent hover:bg-white hover:bg-opacity-10 font-bold py-3 px-8 border-2 border-white rounded-lg transition duration-300 transform hover:scale-105"
+              >
                 Get Legal Assistance
               </button>
             </div>
@@ -236,7 +239,7 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-     {/* Footer with Contact Section */}
+      {/* Footer with Contact Section */}
       <footer ref={contactRef} className="bg-[#141E28] text-white pt-11 pb-7">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -288,8 +291,7 @@ export default function Home() {
                   <i className="fas fa-envelope mr-2"></i> help@vaani-nyay.in
                 </li>
                 <li className="text-gray-400">
-                  <i className="fas fa-map-marker-alt mr-2"></i>Indore,
-                  India
+                  <i className="fas fa-map-marker-alt mr-2"></i>Indore, India
                 </li>
               </ul>
             </div>
@@ -333,5 +335,3 @@ export default function Home() {
     </div>
   );
 }
-
-

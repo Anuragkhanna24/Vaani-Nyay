@@ -28,7 +28,7 @@ Local Setup
 
 1. Clone the repository:
 
-git clone https://github.com/yourusername/vaani-nyay.git
+git clone https://github.com/Anuragkhanna24/Vaani-Nyay.git
 cd vaani-nyay
 
 2. Backend setup:

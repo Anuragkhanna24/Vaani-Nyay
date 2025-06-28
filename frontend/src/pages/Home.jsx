@@ -72,7 +72,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 py-24 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center">
             <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-6">
-              Empowering Justice with Simplicity
+              Making Legal Aid Simple and Accessible
             </h1>
             <p className="max-w-2xl mx-auto text-xl md:text-2xl mb-8">
               Voice-powered legal aid for every Indian citizen. File your legal

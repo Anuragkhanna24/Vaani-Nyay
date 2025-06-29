@@ -38,6 +38,8 @@ const AadhaarESignPage: React.FC = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [otpTimer, setOtpTimer] = useState(300); // 5 minutes
   const [signatureProgress, setSignatureProgress] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
 
   const navigate = useNavigate();
 
@@ -168,6 +170,26 @@ const AadhaarESignPage: React.FC = () => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const handleSubmitToAuthority = () => {
+    const email = "govt@gmail.com";
+    const subject = encodeURIComponent("Signed Court Document Submission");
+    const body = encodeURIComponent(
+      `Dear Authority,
+
+Please find attached the signed court document for your records.
+
+(Attach the file: Application_Form_2024.pdf before sending)
+
+Regards,
+Vaani Nyay`
+    );
+    // Open Gmail compose with pre-filled fields
+    window.open(
+      `https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${subject}&body=${body}`,
+      "_blank"
+    );
   };
 
   const renderStepContent = () => {
@@ -408,6 +430,11 @@ const AadhaarESignPage: React.FC = () => {
               <p className="text-gray-600">
                 Your document has been digitally signed and is ready for submission.
               </p>
+              {submitSuccess && (
+                <div className="mt-4 bg-green-50 text-green-700 p-3 rounded-md">
+                  Document submitted successfully! Redirecting...
+                </div>
+              )}
             </div>
 
             <div className="bg-gray-50 p-6 rounded-lg border">
@@ -439,13 +466,21 @@ const AadhaarESignPage: React.FC = () => {
                 <Download className="h-5 w-5 mr-2" />
                 Download Signed Document
               </button>
-              <button className="flex-1 flex items-center justify-center px-4 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
-                <Send className="h-5 w-5 mr-2" />
-                Submit
+              <button
+                onClick={handleSubmitToAuthority}
+                disabled={isSubmitting || submitSuccess}
+                className="flex-1 flex items-center justify-center px-4 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:bg-green-400"
+              >
+                {isSubmitting ? (
+                  <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
+                ) : (
+                  <Send className="h-5 w-5 mr-2" />
+                )}
+                {isSubmitting ? 'Submitting...' : 'Submit'}
               </button>
               <button
                 className="flex-1 flex items-center justify-center px-4 py-3 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors"
-                onClick={() => navigate('/forms')}
+                onClick={() => navigate('/')}
               >
                 <Home className="h-5 w-5 mr-2" />
                 Home
